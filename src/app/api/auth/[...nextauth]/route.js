@@ -1,6 +1,7 @@
 import { connectDB } from "@/connectDB";
 import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from "bcrypt";
 
 const handler = NextAuth({
   secret: process.env.NEXT_PUBLIC_AUTH_SECRET,
@@ -26,16 +27,31 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         const {email,password} = credentials;
+    
+
+
+        if(!email || !password){
+          return null;
+        }
+
         const db = await connectDB();
         const usersCollection = await db.collection("usersCollection");
 
         const currentUser = await usersCollection.findOne({email})
-        
-        if(!credentials){
-          return null;
+
+
+        if(!currentUser){
+          return null
         }
 
-        return true
+
+
+        const matchedPassword = await bcrypt.compareSync(password, currentUser.password);
+
+        if(matchedPassword){
+          return true
+        }
+        
       }
     }),
   ],

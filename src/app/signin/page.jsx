@@ -4,21 +4,28 @@ import { redirect } from "next/dist/server/api-utils";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import "react-notifications/lib/notifications.css";
 
 import {signIn} from"next-auth/react"
+import { NotificationContainer, NotificationManager } from "react-notifications";
 
 const page =() => {
-  const handleSignIn =  event =>{
+  const handleSignIn =async  event =>{
     event.preventDefault();
-    const email = event.target.name.value;
+    const email = event.target.email.value;
     const password = event.target.password.value;
-    
-    const res = signIn("credentials",{
+    const res = await signIn("credentials",{
       email,
       password,
-     
+      redirect : false
     })
-    console.log(res);
+    
+    if(res.ok){
+      return NotificationManager.success("Succesfully LoggedIn", "User Created");
+    }
+    else{
+      return NotificationManager.error("Invaild Credential", "Failed to Login");
+    }
   }
   return (
     <div>
@@ -54,6 +61,7 @@ const page =() => {
           </form>
         </div>
       </div>
+      <NotificationContainer />
     </div>
   );
 };

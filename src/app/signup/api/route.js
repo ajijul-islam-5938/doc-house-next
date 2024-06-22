@@ -7,7 +7,7 @@ export const POST = async(request)=>{
         const usersCollection = await db.collection("usersCollection");
         const userInfo = await request.json();
 
-        const hashPassword = await bcrypt.hashSync(userInfo.password, 14);
+        const hashPassword = bcrypt.hashSync(userInfo.password, 14);
 
         const exist = await usersCollection.findOne({email : userInfo.email})
         if(exist){
