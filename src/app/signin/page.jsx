@@ -3,10 +3,10 @@ import { Button, Divider, Input } from "@nextui-org/react";
 import { redirect } from "next/dist/server/api-utils";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import "react-notifications/lib/notifications.css";
 
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import {
   NotificationContainer,
   NotificationManager,
@@ -14,12 +14,13 @@ import {
 import { FaGoogle } from "react-icons/fa6";
 import SocialLogin from "@/components/SocialLogin/SocialLogin";
 
-const page = () => {
+const Signin = () => {
+  const session = useSession();
+
   const handleSignIn = async event => {
     event.preventDefault();
     const email = event.target.email.value;
     const password = event.target.password.value;
-
 
     const res = await signIn("credentials", {
       email,
@@ -28,12 +29,9 @@ const page = () => {
     });
 
     if (res.ok) {
-      return NotificationManager.success(
-        "Succesfully Logged In",
-        "Logged In"
-      );
+      NotificationManager.success("Succesfully Logged In", "Logged In");
     } else {
-      return NotificationManager.error("Invaild Credential", "Failed to Login");
+      NotificationManager.error("Invaild Credential", "Failed to Login");
     }
   };
   return (
@@ -90,12 +88,11 @@ const page = () => {
             >
               Sign In
             </Button>
-            <Divider className="my-3" orientation="horizontal"/>
-           
-              <SocialLogin/>
             <p>
               Already Registered ? <Link href="/signup">Sign Up</Link>
             </p>
+            <Divider className="my-3" orientation="horizontal" />
+            <SocialLogin />
           </form>
         </div>
       </div>
@@ -104,4 +101,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Signin;

@@ -46,13 +46,34 @@ const handler = NextAuth({
       },
     }),
     GoogleProvider({
-      clientId : process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-      clientSecret : process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET
-    })
+      clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+      clientSecret: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET,
+    }),
   ],
-  callbacks: {},
+  callbacks: {
+    async signIn({ user, account, profile, email, credentials }) {
+      if (account.provider === "google") {
+        const { email, name, image } = user;
+
+        const db = await connectDB();
+        const users = await db.collection("usersCollection");
+        const exist = await users.findOne({ email });
+
+        if (!exist) {
+          const res = await users.insertOne(user);
+          return user;
+        }
+        else{
+          return user
+        }
+      } else {
+        return false;
+      }
+    },
+  },
+
   pages: {
-    // signIn: "/signin",
+    signIn: "/signin",
   },
 });
 

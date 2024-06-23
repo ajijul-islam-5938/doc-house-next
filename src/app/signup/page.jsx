@@ -11,7 +11,6 @@ import {
 } from "react-notifications";
 import "react-notifications/lib/notifications.css";
 
-
 const page = () => {
   const handleSignUp = async event => {
     event.preventDefault();
@@ -27,21 +26,24 @@ const page = () => {
     const userInfo = {
       name: event.target.name.value,
       email: event.target.email.value,
-      userName: event.target.userName.value,
       photo: event.target.photo.value,
       password: event.target.password.value,
       role: "user",
     };
 
-
     // console.log(userInfo);
-    axios.post("/signup/api",userInfo).then(res => {
-      
+    axios.post("/signup/api", userInfo).then(res => {
       if (res.data.status === 200) {
-        return NotificationManager.success("Succesfully Crated Your Account", "User Created");
+        return NotificationManager.success(
+          "Succesfully Crated Your Account",
+          "User Created"
+        );
       }
-      if(res.data.status === 304){
-        return NotificationManager.error("User already exist with this email", "User Exist")
+      if (res.data.status === 304) {
+        return NotificationManager.error(
+          "User already exist with this email",
+          "User Exist"
+        );
       }
     });
   };
@@ -88,12 +90,6 @@ const page = () => {
               name="email"
             />
             <Input
-              type="text"
-              label="User Name"
-              labelPlacement="outside"
-              name="userName"
-            />
-            <Input
               type="password"
               label="Password"
               labelPlacement="outside"
@@ -111,11 +107,11 @@ const page = () => {
             >
               Create Account
             </Button>
-            <Divider className="my-3" orientation="horizontal"/>
-            <SocialLogin/>
             <p>
               Already Registered ? <Link href="/api/auth/signin ">Sign In</Link>
             </p>
+            <Divider className="my-3" orientation="horizontal" />
+            <SocialLogin />
           </form>
         </div>
       </div>

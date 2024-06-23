@@ -61,13 +61,13 @@ const Nav = () => {
             variant="flat"
             radius="md"
             size="sm"
-            color="primary"
+            
             as={Link}
               className={`w-full ${
                 path === item.path ? "text-primary" : "text-white"
               } text-sm`}
               href={item.path}
-              color={path === item.path ? "success" : "danger"}
+              color={path === item.path ? "success" : "default"}
               
             >
               {item.label}
