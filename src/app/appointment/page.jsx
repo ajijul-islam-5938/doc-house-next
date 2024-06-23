@@ -6,7 +6,7 @@ import React, { useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 
-const page = () => {
+const Appointment = () => {
   const [value, onChange] = useState(new Date());
   return (
     <div>
@@ -229,4 +229,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Appointment;

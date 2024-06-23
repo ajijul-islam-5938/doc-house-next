@@ -11,6 +11,7 @@ import {
   Button,
   Avatar,
   User,
+  Divider,
 } from "@nextui-org/react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -56,16 +57,21 @@ const Nav = () => {
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         {menuItems.map((item, index) => (
           <NavbarItem key={`${item}-${index}`}>
-            <Link
+            <Button
+            variant="flat"
+            radius="md"
+            size="sm"
+            color="primary"
+            as={Link}
               className={`w-full ${
                 path === item.path ? "text-primary" : "text-white"
               } text-sm`}
               href={item.path}
               color={path === item.path ? "success" : "danger"}
-              size="lg"
+              
             >
               {item.label}
-            </Link>
+            </Button>
           </NavbarItem>
         ))}
       </NavbarContent>
@@ -107,17 +113,18 @@ const Nav = () => {
                   <DropdownItem
                     isReadOnly
                     key="profile"
-                    className="h-14 gap-2 opacity-100"
+                    className="h-14 gap-2 opacity-100 my-10"
                   >
-                    <div className="flex gap-5 justify-center items-center text-black font-semibold">
+                    <div className="flex flex-col gap-5 justify-center items-center text-black font-semibold">
                       <Avatar src={session?.data.user.image} />
                       <div>
-                        <h1 className="text-lg ">
+                        <h1 className="text-lg text-center ">
                           {session?.data?.user?.name}
                         </h1>
                         <p>{session?.data?.user?.email}</p>
                       </div>
                     </div>
+                    <Divider orientation="vertical" className="my-5"/>
                   </DropdownItem>
                   <DropdownItem key="dashboard">Dashboard</DropdownItem>
                 </DropdownSection>
