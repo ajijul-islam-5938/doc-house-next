@@ -1,32 +1,41 @@
-"use client"
-import { Button, Input, } from "@nextui-org/react";
+"use client";
+import { Button, Divider, Input } from "@nextui-org/react";
 import { redirect } from "next/dist/server/api-utils";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import "react-notifications/lib/notifications.css";
 
-import {signIn} from"next-auth/react"
-import { NotificationContainer, NotificationManager } from "react-notifications";
+import { signIn } from "next-auth/react";
+import {
+  NotificationContainer,
+  NotificationManager,
+} from "react-notifications";
+import { FaGoogle } from "react-icons/fa6";
+import SocialLogin from "@/components/SocialLogin/SocialLogin";
 
-const page =() => {
-  const handleSignIn =async  event =>{
+const page = () => {
+  const handleSignIn = async event => {
     event.preventDefault();
     const email = event.target.email.value;
     const password = event.target.password.value;
-    const res = await signIn("credentials",{
+
+
+    const res = await signIn("credentials", {
       email,
       password,
-      redirect : false
-    })
-    
-    if(res.ok){
-      return NotificationManager.success("Succesfully LoggedIn", "User Created");
-    }
-    else{
+      redirect: false,
+    });
+
+    if (res.ok) {
+      return NotificationManager.success(
+        "Succesfully Logged In",
+        "Logged In"
+      );
+    } else {
       return NotificationManager.error("Invaild Credential", "Failed to Login");
     }
-  }
+  };
   return (
     <div>
       <div className="grid md:grid-cols-2">
@@ -50,14 +59,43 @@ const page =() => {
           />
         </div>
         <div className="h-screen flex items-center justify-center">
-          <form onSubmit={handleSignIn} className="border p-3 w-[95%] md:p-10 md:w-[60%] mx-auto ">
-            <h1 className="text-xl font-semibold text-center">Sign in to Doc House</h1>
+          <form
+            onSubmit={handleSignIn}
+            className="border p-3 w-[95%] md:p-10 md:w-[60%] mx-auto "
+          >
+            <h1 className="text-xl font-semibold text-center">
+              Sign in to Doc House
+            </h1>
+
+            <Input
+              type="email"
+              name="email"
+              label="Email"
+              labelPlacement="outside"
+            />
+
+            <Input
+              type="password"
+              name="password"
+              label="Password"
+              labelPlacement="outside"
+            />
+            <Button
+              type="submit"
+              className="my-3"
+              variant="solid"
+              color="warning"
+              fullWidth
+              radius="md"
+            >
+              Sign In
+            </Button>
+            <Divider className="my-3" orientation="horizontal"/>
            
-            <Input type="email" name="email" label="Email" labelPlacement="outside" />
-           
-            <Input type="password" name="password" label="Password" labelPlacement="outside" />
-            <Button type="submit" className="my-3" variant="solid" color="warning" fullWidth radius="md">Sign In</Button>
-            <p>Already Registered ? <Link href="/signup">Sign Up</Link></p>
+              <SocialLogin/>
+            <p>
+              Already Registered ? <Link href="/signup">Sign Up</Link>
+            </p>
           </form>
         </div>
       </div>

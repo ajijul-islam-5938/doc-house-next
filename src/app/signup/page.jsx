@@ -1,5 +1,6 @@
 "use client";
-import { Button, Input, user } from "@nextui-org/react";
+import SocialLogin from "@/components/SocialLogin/SocialLogin";
+import { Button, Divider, Input, user } from "@nextui-org/react";
 import axios from "axios";
 import Image from "next/image";
 import Link from "next/link";
@@ -110,6 +111,8 @@ const page = () => {
             >
               Create Account
             </Button>
+            <Divider className="my-3" orientation="horizontal"/>
+            <SocialLogin/>
             <p>
               Already Registered ? <Link href="/api/auth/signin ">Sign In</Link>
             </p>

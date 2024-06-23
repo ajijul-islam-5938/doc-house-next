@@ -23,10 +23,14 @@ import {
   DropdownSection,
   DropdownItem,
 } from "@nextui-org/react";
+import { signOut, useSession } from "next-auth/react";
 
 const Nav = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const path = usePathname();
+  const session = useSession();
+  console.log(session);
+
   return (
     <Navbar
       className="fixed top-0 left-0 right-0 mx-0 bg-transparent md:px-32 py-3"
@@ -66,68 +70,80 @@ const Nav = () => {
         ))}
       </NavbarContent>
       <NavbarContent justify="end">
-        <NavbarItem className="hidden lg:flex">
-          <Dropdown
-            showArrow
-            radius="sm"
-            classNames={{
-              base: "before:bg-default-200", // change arrow background
-              content: "p-0 border-small border-divider bg-background",
-            }}
-            backdrop="blur"
-          >
-            <DropdownTrigger>
-              <Avatar src="https://i.pravatar.cc/150?u=a04258a2462d826712d" />
-            </DropdownTrigger>
-            <DropdownMenu
-              aria-label="Custom item styles"
-              disabledKeys={["profile"]}
-              className="p-3"
-              itemClasses={{
-                base: [
-                  "rounded-md",
-                  "text-default-500",
-                  "transition-opacity",
-                  "data-[hover=true]:text-foreground",
-                  "data-[hover=true]:bg-default-100",
-                  "dark:data-[hover=true]:bg-default-50",
-                  "data-[selectable=true]:focus:bg-default-50",
-                  "data-[pressed=true]:opacity-70",
-                  "data-[focus-visible=true]:ring-default-500",
-                ],
+        {session.status === "authenticated" && (
+          <NavbarItem className="hidden lg:flex">
+            <Dropdown
+              showArrow
+              radius="sm"
+              classNames={{
+                base: "before:bg-default-200", // change arrow background
+                content: "p-0 border-small border-divider bg-background",
               }}
+              backdrop="blur"
             >
-              <DropdownSection aria-label="Profile & Actions" showDivider>
-                <DropdownItem isReadOnly key="profile" className="h-14 gap-2 opacity-100">
-                  <div className="flex gap-5 justify-center items-center text-black font-semibold">
-                    <Avatar src="https://i.pravatar.cc/150?u=a04258a2462d826712d" />
-                    <div>
-                      <h1 className="text-lg ">Ajijul Islam</h1>
-                      <p>emaple@gmail.com</p>
-                    </div>
-                  </div>
-                </DropdownItem>
-                <DropdownItem key="dashboard">Dashboard</DropdownItem>
-              </DropdownSection>
+              <DropdownTrigger>
+              <Avatar src={session?.data.user.image} />
 
-              <DropdownSection aria-label="Help & Feedback">
-                <DropdownItem key="logout">Log Out</DropdownItem>
-              </DropdownSection>
-            </DropdownMenu>
-          </Dropdown>
-        </NavbarItem>
-        <NavbarItem>
-          <Button
-            as={Link}
-            color="warning"
-            href="/signin"
-            variant="solid"
-            radius="none"
-            
-          >
-            Sign In
-          </Button>
-        </NavbarItem>
+              </DropdownTrigger>
+              <DropdownMenu
+                aria-label="Custom item styles"
+                disabledKeys={["profile"]}
+                className="p-3"
+                itemClasses={{
+                  base: [
+                    "rounded-md",
+                    "text-default-500",
+                    "transition-opacity",
+                    "data-[hover=true]:text-foreground",
+                    "data-[hover=true]:bg-default-100",
+                    "dark:data-[hover=true]:bg-default-50",
+                    "data-[selectable=true]:focus:bg-default-50",
+                    "data-[pressed=true]:opacity-70",
+                    "data-[focus-visible=true]:ring-default-500",
+                  ],
+                }}
+              >
+                <DropdownSection aria-label="Profile & Actions" showDivider>
+                  <DropdownItem
+                    isReadOnly
+                    key="profile"
+                    className="h-14 gap-2 opacity-100"
+                  >
+                    <div className="flex gap-5 justify-center items-center text-black font-semibold">
+                      <Avatar src={session?.data.user.image} />
+                      <div>
+                        <h1 className="text-lg ">
+                          {session?.data?.user?.name}
+                        </h1>
+                        <p>{session?.data?.user?.email}</p>
+                      </div>
+                    </div>
+                  </DropdownItem>
+                  <DropdownItem key="dashboard">Dashboard</DropdownItem>
+                </DropdownSection>
+
+                <DropdownSection aria-label="Help & Feedback">
+                  <DropdownItem onClick={() => signOut()} key="logout">
+                    Log Out
+                  </DropdownItem>
+                </DropdownSection>
+              </DropdownMenu>
+            </Dropdown>
+          </NavbarItem>
+        )}
+        {session.status === "unauthenticated" && (
+          <NavbarItem>
+            <Button
+              as={Link}
+              color="warning"
+              href="/signin"
+              variant="solid"
+              radius="none"
+            >
+              Sign In
+            </Button>
+          </NavbarItem>
+        )}
       </NavbarContent>
       <NavbarMenu>
         {menuItems.map((item, index) => (
