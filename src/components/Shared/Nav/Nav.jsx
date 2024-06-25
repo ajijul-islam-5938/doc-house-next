@@ -34,7 +34,7 @@ const Nav = () => {
 
   return (
     <Navbar
-      className="fixed top-0 left-0 right-0 mx-0 bg-transparent md:px-32 py-3"
+      className="fixed top-0 left-0 right-0 mx-0 bg-transparent md:px-32"
       isBlurred
       maxWidth="xl"
       onMenuOpenChange={setIsMenuOpen}
@@ -76,8 +76,8 @@ const Nav = () => {
         ))}
       </NavbarContent>
       <NavbarContent justify="end">
-        {session.status === "authenticated" && (
-          <NavbarItem className="hidden lg:flex">
+      {session.status === "authenticated" && (
+          <NavbarItem>
             <Dropdown
               showArrow
               radius="sm"

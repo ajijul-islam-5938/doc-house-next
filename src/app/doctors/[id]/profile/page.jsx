@@ -1,13 +1,31 @@
 "use client";
 import PageCover from "@/components/PageCover/PageCover";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Rating } from "@smastrom/react-rating";
 import "@smastrom/react-rating/style.css";
 import { CiLocationOn } from "react-icons/ci";
 import { Button, Card, CardBody, Tab, Tabs } from "@nextui-org/react";
+import axios from "axios";
 
-const page = () => {
+const DoctorProfile = ({ params }) => {
+  const [doctor, setDoctor] = useState(null);
+
+  useEffect(() => {
+    const getDoctor = async () => {
+      const id = await params.id;
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/doctors/${id}`
+      );
+      setDoctor(res.data.result);
+    };
+    getDoctor();
+  }, [params.id]);
+
+  if (!doctor) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="bg-gray-50 w-full h-full pb-20">
       <PageCover />
@@ -16,27 +34,29 @@ const page = () => {
           <div className="md:col-span-2">
             <Image
               className=""
-              src="/assets/images/doctor2.png"
+              src={doctor.profile_image}
               height={200}
               width={400}
               alt="tablet"
             />
           </div>
           <div className="md:col-span-3 flex flex-col justify-between gap-2">
-            <h1 className="text-2xl font-semibold">Karyen Anderson</h1>
-            <p>MBBS, MD - General Medicine</p>
+            <h1 className="text-2xl font-semibold">{doctor.name}</h1>
+            <p>{doctor.qualifications}</p>
             <div className="flex items-center">
-              <Rating style={{ maxWidth: 120 }} readOnly value={4} />{" "}
-              <span>(32)</span>
+              <Rating
+                style={{ maxWidth: 120 }}
+                readOnly
+                value={doctor.rating}
+              />
+              <span>({doctor.reviews_count})</span>
             </div>
             <div className="flex items-center gap-3">
-              <div>
-                <CiLocationOn />
-              </div>
-              <div>Dhanmondi, Dhaka, Bangladesh - Get Directions</div>
+              <CiLocationOn />
+              <div>{doctor.location.address}</div>
             </div>
             <div className="">
-              <div className="md:w-1/2 grid grid-cols-3 md:grid-cols-6 gap-1 my-10`">
+              <div className="md:w-1/2 grid grid-cols-3 md:grid-cols-6 gap-1 my-10">
                 <div className="h-12 rounded-lg bg-gray-100"></div>
                 <div className="h-12 rounded-lg bg-gray-100"></div>
                 <div className="h-12 rounded-lg bg-gray-100"></div>
@@ -60,7 +80,7 @@ const page = () => {
                 size="sm"
                 className="border-1"
               >
-                Teeth Whitneing
+                Teeth Whitening
               </Button>
             </div>
           </div>
@@ -72,12 +92,147 @@ const page = () => {
             radius="none"
             size="lg"
             aria-label="Dynamic tabs"
-            items={tabs}
+            items={doctor.otherInfo}
             className="w-full mx-auto grid grid-cols-1"
           >
             {item => (
               <Tab key={item.id} title={item.label}>
-                <div>{item.content}</div>
+                <div>
+                  {item.id === "overview" && (
+                    <div>
+                      <div className="my-10">
+                        <h2 className="text-2xl my-10 font-semibold">
+                          About Me
+                        </h2>
+                        <p>
+                          {item.overView.about}
+                          {item.overView.about}
+                        </p>
+                      </div>
+                      <div className="grid md:grid-cols-4">
+                        <div className="md:col-span-2 space-y-3">
+                          <h2 className="text-xl font-semibold">Education</h2>
+                          <ul className="list-disc ml-5 space-y-3">
+                            {item.overView.education.map((edu, index) => (
+                              <>
+                                <li key={index}>
+                                  {edu.institution} ({edu.years}) - {edu.degree}
+                                </li>
+                                <li key={index}>
+                                  {edu.institution} ({edu.years}) - {edu.degree}
+                                </li>
+                                <li key={index}>
+                                  {edu.institution} ({edu.years}) - {edu.degree}
+                                </li>
+                              </>
+                            ))}
+                          </ul>
+                          <h2 className="text-xl font-semibold my-10">
+                            Work Experience
+                          </h2>
+                          <ul className="list-disc space-y-3 ml-5">
+                            {item.overView.work_experience.map((exp, index) => (
+                              <>
+                                {" "}
+                                <li key={index}>
+                                  {exp.institution} ({exp.years}) -{" "}
+                                  {exp.position}
+                                </li>
+                                <li key={index}>
+                                  {exp.institution} ({exp.years}) -{" "}
+                                  {exp.position}
+                                </li>
+                                <li key={index}>
+                                  {exp.institution} ({exp.years}) -{" "}
+                                  {exp.position}
+                                </li>
+                              </>
+                            ))}
+                          </ul>
+                          <h3 className="text-xl font-semibold">
+                            Specializations
+                          </h3>
+                          <ul className="ml-5 list-disc space-y-3">
+                            {item.overView.specializations.map(
+                              (spec, index) => (
+                                <li key={index}>{spec}</li>
+                              )
+                            )}
+                          </ul>
+                        </div>
+                        <div className="md:col-span-2 space-y-3">
+                          <h3 className="text-xl font-semibold mt-4 md:mt-0">Awards</h3>
+                          <ul className="list-disc ml-5 space-y-3">
+                            {item.overView.awards.map((award, index) => (
+                              <>
+                                <p>{award.date}</p>
+                                <li key={index}>
+                                  {award.name} - {award.description} (
+                                </li>
+                                <p>{award.date}</p>
+                                <li key={index}>
+                                  {award.name} - {award.description} (
+                                </li>
+                                <p>{award.date}</p>
+                                <li key={index}>
+                                  {award.name} - {award.description} (
+                                </li>
+                                <p>{award.date}</p>
+                                <li key={index}>
+                                  {award.name} - {award.description} (
+                                </li>
+                              </>
+                            ))}
+                          </ul>
+
+                         
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {item.id === "review" && <div>Review</div>}
+                  {item.id === "location" && (
+                    <div>
+                      <p>
+                        <strong>Address:</strong> {item?.location?.address}
+                      </p>
+                      <p>
+                        <strong>Phone:</strong> {item?.location?.phone}
+                      </p>
+                      <p>
+                        <strong>Email:</strong> {item?.location?.email}
+                      </p>
+                      <p>
+                        <strong>Map:</strong>{" "}
+                        <a
+                          href={item.location.map}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          View on Map
+                        </a>
+                      </p>
+                    </div>
+                  )}
+
+                  {item.id === "bussiness" && (
+                    <div>
+                      <h3>Business Hours</h3>
+                      <ul>
+                        {Object.entries(item.business_hours).map(
+                          ([day, hours], index) => (
+                            <li key={index}>
+                              <strong>
+                                {day.charAt(0).toUpperCase() + day.slice(1)}:
+                              </strong>{" "}
+                              {hours}
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </Tab>
             )}
           </Tabs>
@@ -87,543 +242,4 @@ const page = () => {
   );
 };
 
-export default page;
-
-let tabs = [
-  {
-    id: "overviews",
-    label: "Overviews",
-    content: (
-      <div className="">
-        <h2 className="text-2xl font-semibold">About me</h2>
-        <p className="my-10">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-          culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-        <div className="grid md:grid-cols-3 gap-10">
-          <div className="md:col-span-1">
-            <div className="space-y-5 pt-5">
-              <h2 className="text-xl font-semibold">Education</h2>
-              <ul className="ml-6">
-                <li className="list-disc">
-                  <h2 className="">American Dental Medical University</h2>
-                  <ul>
-                    <li className="text-xs">BDS</li>
-                    <li className="text-xs"> 1998 - 2003</li>
-                  </ul>
-                </li>{" "}
-                <li className="list-disc">
-                  <h2 className="">American Dental Medical University</h2>
-                  <ul>
-                    <li className="text-xs">BDS</li>
-                    <li className="text-xs"> 1998 - 2003</li>
-                  </ul>
-                </li>{" "}
-              </ul>
-            </div>
-            <div className="space-y-5 pt-5">
-              <h2 className="text-xl font-semibold">Work & Experience</h2>
-              <ul className="ml-6">
-                <li className="list-disc">
-                  <h2 className="">Glowing Smiles Family Dental Clinic</h2>
-                  <ul>
-                    <li className="text-xs"> 2010 - Present (5 years)</li>
-                  </ul>
-                </li>{" "}
-                <li className="list-disc">
-                  <h2 className="">Dream Smile Dental Practice</h2>
-                  <ul>
-                    <li className="text-xs"> 2005 - 2007 (2 years)</li>
-                  </ul>
-                </li>{" "}
-              </ul>
-            </div>
-            <div className="space-y-5 pt-5">
-              <h2 className="text-xl font-semibold">Services</h2>
-              <ul className="ml-6">
-                <li className="list-disc">Tooth cleaning</li>{" "}
-                <li className="list-disc">Implants</li>
-                <li className="list-disc">Composite Bonding</li>
-                <li className="list-disc">Fissure Sealants</li>
-                <li className="list-disc">Surgical Extractions</li>
-              </ul>
-            </div>
-          </div>
-          <div className="md:col-span-2 space-y-5 pt-5">
-            <div className="">
-              <h2 className="text-xl font-semibold">Awards</h2>
-              <ul className="ml-6 space-y-2">
-                <p className="text-sm my-1"> July 2019</p>
-                <li className="list-disc">
-                  <h2 className="text">Humanitarian Award</h2>
-                  <ul className="space-y-2">
-                    <li className="text-xs">
-                      {" "}
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                      Proin a ipsum tellus.{" "}
-                    </li>
-                    <li className="text-xs">
-                      {" "}
-                      Interdum et malesuada fames ac ante ipsum primis in
-                      faucibus.
-                    </li>
-                  </ul>
-                </li>{" "}
-                <p className="text-sm my-1"> July 2019</p>
-                <li className="list-disc">
-                  <h2 className="">
-                    Certificate for International Volunteer Service
-                  </h2>
-                  <ul className="space-y-2">
-                    <li className="text-xs">
-                      {" "}
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                      Proin a ipsum tellus.{" "}
-                    </li>
-                    <li className="text-xs">
-                      {" "}
-                      Interdum et malesuada fames ac ante ipsum primis in
-                      faucibus.
-                    </li>
-                  </ul>
-                </li>{" "}
-              </ul>
-            </div>
-            <div className="space-y-3">
-              <p className="text-sm my-1 ml-6"> July 2019</p>
-
-              <ul className="ml-6 list-disc">
-                <li>The Dental Professional of The Year Award</li>
-                <ul className="space-y-2 list-disc ml-5">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
-                  a ipsum tellus. Interdum et malesuada fames ac ante ipsum
-                  primis in faucibus.
-                </ul>
-                <li className="list-disc">
-                  <h2 className=" my-2 text-xl font-semibold">
-                    Specializations
-                  </h2>
-                  <ul className="space-y-2 list-disc ml-5">
-                    <li className="text-xs"> Children Care</li>
-                    <li className="text-xs">Dental Care</li>
-                    <li className="text-xs">Oral and Maxillofacial Surgery</li>
-                    <li className="text-xs">Orthodontist</li>
-                    <li className="text-xs">Periodontist</li>
-                    <li className="text-xs">Prosthodontics</li>
-                  </ul>
-                </li>{" "}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    ),
-  },
-  {
-    id: "location",
-    label: "Location",
-    content: (
-      <div className="">
-        <h2 className="text-2xl font-semibold">Locations</h2>
-        <p className="my-10">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-          culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-        <div className="grid md:grid-cols-3 gap-10">
-          <div className="md:col-span-1">
-            <div className="space-y-5 pt-5">
-              <h2 className="text-xl font-semibold">Education</h2>
-              <ul className="ml-6">
-                <li className="list-disc">
-                  <h2 className="">American Dental Medical University</h2>
-                  <ul>
-                    <li className="text-xs">BDS</li>
-                    <li className="text-xs"> 1998 - 2003</li>
-                  </ul>
-                </li>{" "}
-                <li className="list-disc">
-                  <h2 className="">American Dental Medical University</h2>
-                  <ul>
-                    <li className="text-xs">BDS</li>
-                    <li className="text-xs"> 1998 - 2003</li>
-                  </ul>
-                </li>{" "}
-              </ul>
-            </div>
-            <div className="space-y-5 pt-5">
-              <h2 className="text-xl font-semibold">Work & Experience</h2>
-              <ul className="ml-6">
-                <li className="list-disc">
-                  <h2 className="">Glowing Smiles Family Dental Clinic</h2>
-                  <ul>
-                    <li className="text-xs"> 2010 - Present (5 years)</li>
-                  </ul>
-                </li>{" "}
-                <li className="list-disc">
-                  <h2 className="">Dream Smile Dental Practice</h2>
-                  <ul>
-                    <li className="text-xs"> 2005 - 2007 (2 years)</li>
-                  </ul>
-                </li>{" "}
-              </ul>
-            </div>
-            <div className="space-y-5 pt-5">
-              <h2 className="text-xl font-semibold">Services</h2>
-              <ul className="ml-6">
-                <li className="list-disc">Tooth cleaning</li>{" "}
-                <li className="list-disc">Implants</li>
-                <li className="list-disc">Composite Bonding</li>
-                <li className="list-disc">Fissure Sealants</li>
-                <li className="list-disc">Surgical Extractions</li>
-              </ul>
-            </div>
-          </div>
-          <div className="md:col-span-2 space-y-5 pt-5">
-            <div className="">
-              <h2 className="text-xl font-semibold">Awards</h2>
-              <ul className="ml-6 space-y-2">
-                <p className="text-sm my-1"> July 2019</p>
-                <li className="list-disc">
-                  <h2 className="text">Humanitarian Award</h2>
-                  <ul className="space-y-2">
-                    <li className="text-xs">
-                      {" "}
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                      Proin a ipsum tellus.{" "}
-                    </li>
-                    <li className="text-xs">
-                      {" "}
-                      Interdum et malesuada fames ac ante ipsum primis in
-                      faucibus.
-                    </li>
-                  </ul>
-                </li>{" "}
-                <p className="text-sm my-1"> July 2019</p>
-                <li className="list-disc">
-                  <h2 className="">
-                    Certificate for International Volunteer Service
-                  </h2>
-                  <ul className="space-y-2">
-                    <li className="text-xs">
-                      {" "}
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                      Proin a ipsum tellus.{" "}
-                    </li>
-                    <li className="text-xs">
-                      {" "}
-                      Interdum et malesuada fames ac ante ipsum primis in
-                      faucibus.
-                    </li>
-                  </ul>
-                </li>{" "}
-              </ul>
-            </div>
-            <div className="space-y-3">
-              <p className="text-sm my-1 ml-6"> July 2019</p>
-
-              <ul className="ml-6 list-disc">
-                <li>The Dental Professional of The Year Award</li>
-                <ul className="space-y-2 list-disc ml-5">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
-                  a ipsum tellus. Interdum et malesuada fames ac ante ipsum
-                  primis in faucibus.
-                </ul>
-                <li className="list-disc">
-                  <h2 className=" my-2 text-xl font-semibold">
-                    Specializations
-                  </h2>
-                  <ul className="space-y-2 list-disc ml-5">
-                    <li className="text-xs"> Children Care</li>
-                    <li className="text-xs">Dental Care</li>
-                    <li className="text-xs">Oral and Maxillofacial Surgery</li>
-                    <li className="text-xs">Orthodontist</li>
-                    <li className="text-xs">Periodontist</li>
-                    <li className="text-xs">Prosthodontics</li>
-                  </ul>
-                </li>{" "}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    ),
-  },
-  {
-    id: "reviews",
-    label: "Reviews",
-    content: (
-      <div className="">
-        <h2 className="text-2xl font-semibold">Reviews</h2>
-        <p className="my-10">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-          culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-        <div className="grid md:grid-cols-3 gap-10">
-          <div className="md:col-span-1">
-            <div className="space-y-5 pt-5">
-              <h2 className="text-xl font-semibold">Education</h2>
-              <ul className="ml-6">
-                <li className="list-disc">
-                  <h2 className="">American Dental Medical University</h2>
-                  <ul>
-                    <li className="text-xs">BDS</li>
-                    <li className="text-xs"> 1998 - 2003</li>
-                  </ul>
-                </li>{" "}
-                <li className="list-disc">
-                  <h2 className="">American Dental Medical University</h2>
-                  <ul>
-                    <li className="text-xs">BDS</li>
-                    <li className="text-xs"> 1998 - 2003</li>
-                  </ul>
-                </li>{" "}
-              </ul>
-            </div>
-            <div className="space-y-5 pt-5">
-              <h2 className="text-xl font-semibold">Work & Experience</h2>
-              <ul className="ml-6">
-                <li className="list-disc">
-                  <h2 className="">Glowing Smiles Family Dental Clinic</h2>
-                  <ul>
-                    <li className="text-xs"> 2010 - Present (5 years)</li>
-                  </ul>
-                </li>{" "}
-                <li className="list-disc">
-                  <h2 className="">Dream Smile Dental Practice</h2>
-                  <ul>
-                    <li className="text-xs"> 2005 - 2007 (2 years)</li>
-                  </ul>
-                </li>{" "}
-              </ul>
-            </div>
-            <div className="space-y-5 pt-5">
-              <h2 className="text-xl font-semibold">Services</h2>
-              <ul className="ml-6">
-                <li className="list-disc">Tooth cleaning</li>{" "}
-                <li className="list-disc">Implants</li>
-                <li className="list-disc">Composite Bonding</li>
-                <li className="list-disc">Fissure Sealants</li>
-                <li className="list-disc">Surgical Extractions</li>
-              </ul>
-            </div>
-          </div>
-          <div className="md:col-span-2 space-y-5 pt-5">
-            <div className="">
-              <h2 className="text-xl font-semibold">Awards</h2>
-              <ul className="ml-6 space-y-2">
-                <p className="text-sm my-1"> July 2019</p>
-                <li className="list-disc">
-                  <h2 className="text">Humanitarian Award</h2>
-                  <ul className="space-y-2">
-                    <li className="text-xs">
-                      {" "}
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                      Proin a ipsum tellus.{" "}
-                    </li>
-                    <li className="text-xs">
-                      {" "}
-                      Interdum et malesuada fames ac ante ipsum primis in
-                      faucibus.
-                    </li>
-                  </ul>
-                </li>{" "}
-                <p className="text-sm my-1"> July 2019</p>
-                <li className="list-disc">
-                  <h2 className="">
-                    Certificate for International Volunteer Service
-                  </h2>
-                  <ul className="space-y-2">
-                    <li className="text-xs">
-                      {" "}
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                      Proin a ipsum tellus.{" "}
-                    </li>
-                    <li className="text-xs">
-                      {" "}
-                      Interdum et malesuada fames ac ante ipsum primis in
-                      faucibus.
-                    </li>
-                  </ul>
-                </li>{" "}
-              </ul>
-            </div>
-            <div className="space-y-3">
-              <p className="text-sm my-1 ml-6"> July 2019</p>
-
-              <ul className="ml-6 list-disc">
-                <li>The Dental Professional of The Year Award</li>
-                <ul className="space-y-2 list-disc ml-5">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
-                  a ipsum tellus. Interdum et malesuada fames ac ante ipsum
-                  primis in faucibus.
-                </ul>
-                <li className="list-disc">
-                  <h2 className=" my-2 text-xl font-semibold">
-                    Specializations
-                  </h2>
-                  <ul className="space-y-2 list-disc ml-5">
-                    <li className="text-xs"> Children Care</li>
-                    <li className="text-xs">Dental Care</li>
-                    <li className="text-xs">Oral and Maxillofacial Surgery</li>
-                    <li className="text-xs">Orthodontist</li>
-                    <li className="text-xs">Periodontist</li>
-                    <li className="text-xs">Prosthodontics</li>
-                  </ul>
-                </li>{" "}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    ),
-  },
-  {
-    id: "business",
-    label: "Business Hours",
-    content: (
-      <div className="">
-        <h2 className="text-2xl font-semibold">Business Hours</h2>
-        <p className="my-10">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-          culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-        <div className="grid md:grid-cols-3 gap-10">
-          <div className="md:col-span-1">
-            <div className="space-y-5 pt-5">
-              <h2 className="text-xl font-semibold">Education</h2>
-              <ul className="ml-6">
-                <li className="list-disc">
-                  <h2 className="">American Dental Medical University</h2>
-                  <ul>
-                    <li className="text-xs">BDS</li>
-                    <li className="text-xs"> 1998 - 2003</li>
-                  </ul>
-                </li>{" "}
-                <li className="list-disc">
-                  <h2 className="">American Dental Medical University</h2>
-                  <ul>
-                    <li className="text-xs">BDS</li>
-                    <li className="text-xs"> 1998 - 2003</li>
-                  </ul>
-                </li>{" "}
-              </ul>
-            </div>
-            <div className="space-y-5 pt-5">
-              <h2 className="text-xl font-semibold">Work & Experience</h2>
-              <ul className="ml-6">
-                <li className="list-disc">
-                  <h2 className="">Glowing Smiles Family Dental Clinic</h2>
-                  <ul>
-                    <li className="text-xs"> 2010 - Present (5 years)</li>
-                  </ul>
-                </li>{" "}
-                <li className="list-disc">
-                  <h2 className="">Dream Smile Dental Practice</h2>
-                  <ul>
-                    <li className="text-xs"> 2005 - 2007 (2 years)</li>
-                  </ul>
-                </li>{" "}
-              </ul>
-            </div>
-            <div className="space-y-5 pt-5">
-              <h2 className="text-xl font-semibold">Services</h2>
-              <ul className="ml-6">
-                <li className="list-disc">Tooth cleaning</li>{" "}
-                <li className="list-disc">Implants</li>
-                <li className="list-disc">Composite Bonding</li>
-                <li className="list-disc">Fissure Sealants</li>
-                <li className="list-disc">Surgical Extractions</li>
-              </ul>
-            </div>
-          </div>
-          <div className="md:col-span-2 space-y-5 pt-5">
-            <div className="">
-              <h2 className="text-xl font-semibold">Awards</h2>
-              <ul className="ml-6 space-y-2">
-                <p className="text-sm my-1"> July 2019</p>
-                <li className="list-disc">
-                  <h2 className="text">Humanitarian Award</h2>
-                  <ul className="space-y-2">
-                    <li className="text-xs">
-                      {" "}
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                      Proin a ipsum tellus.{" "}
-                    </li>
-                    <li className="text-xs">
-                      {" "}
-                      Interdum et malesuada fames ac ante ipsum primis in
-                      faucibus.
-                    </li>
-                  </ul>
-                </li>{" "}
-                <p className="text-sm my-1"> July 2019</p>
-                <li className="list-disc">
-                  <h2 className="">
-                    Certificate for International Volunteer Service
-                  </h2>
-                  <ul className="space-y-2">
-                    <li className="text-xs">
-                      {" "}
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                      Proin a ipsum tellus.{" "}
-                    </li>
-                    <li className="text-xs">
-                      {" "}
-                      Interdum et malesuada fames ac ante ipsum primis in
-                      faucibus.
-                    </li>
-                  </ul>
-                </li>{" "}
-              </ul>
-            </div>
-            <div className="space-y-3">
-              <p className="text-sm my-1 ml-6"> July 2019</p>
-
-              <ul className="ml-6 list-disc">
-                <li>The Dental Professional of The Year Award</li>
-                <ul className="space-y-2 list-disc ml-5">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
-                  a ipsum tellus. Interdum et malesuada fames ac ante ipsum
-                  primis in faucibus.
-                </ul>
-                <li className="list-disc">
-                  <h2 className=" my-2 text-xl font-semibold">
-                    Specializations
-                  </h2>
-                  <ul className="space-y-2 list-disc ml-5">
-                    <li className="text-xs"> Children Care</li>
-                    <li className="text-xs">Dental Care</li>
-                    <li className="text-xs">Oral and Maxillofacial Surgery</li>
-                    <li className="text-xs">Orthodontist</li>
-                    <li className="text-xs">Periodontist</li>
-                    <li className="text-xs">Prosthodontics</li>
-                  </ul>
-                </li>{" "}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    ),
-  },
-];
+export default DoctorProfile;

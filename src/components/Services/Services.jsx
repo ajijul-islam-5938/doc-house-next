@@ -1,19 +1,29 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import SectionTitle from "../Shared/SectionTitle/SectionTitle";
 import Image from "next/image";
-import {
-  Tabs,
-  Tab,
-  Button,
-} from "@nextui-org/react";
+import { Tabs, Tab, Button } from "@nextui-org/react";
 import { IoIosTimer } from "react-icons/io";
 import { CiLocationOn } from "react-icons/ci";
 import { LuPhoneMissed } from "react-icons/lu";
 import Slider from "../Slider/Slider";
-
+import axios from "axios";
+import Link from "next/link";
 
 const Services = () => {
+  const [services, setServices] = useState([]);
+
+  useEffect(() => {
+    const getDoctors = async () => {
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/services/latests`
+      );
+      setServices(res.data.res);
+    };
+    getDoctors();
+  }, []);
+
+  console.log(services);
   return (
     <div className="container mx-auto md:px-32 my-20">
       <div className="grid md:grid-cols-2 gap-y-5 space-y-5">
@@ -41,12 +51,46 @@ const Services = () => {
                 variant="solid"
                 color="warning"
                 className="w-full mx-auto grid grid-cols-1"
-                items={tabs}
+                items={services}
                 radius="none"
               >
                 {item => (
-                  <Tab key={item.id} title={item.label}>
-                    <div className="grid">{item.content}</div>
+                  <Tab key={item._id} title={item.name}>
+                    <div className="grid">
+                      <div className="flex flex-col">
+                        <Image
+                          className="mt-2 h-[300px] rounded-md"
+                          src={item.image}
+                          height={400}
+                          width={700}
+                          alt="tablet"
+                        />
+                        <div className="space-y-5">
+                          <h1 className="text-2xl font-semibold my-3">
+                            {item.name}
+                          </h1>
+                          <p className="">
+                            {
+                              item.description.length > 300 ? item.description.slice(0,300) : item.description
+                            }
+                          </p>
+                          <p className="">
+                          {
+                              item.description.length > 200 ? item.description.slice(0,200) : item.description
+                            }
+                          </p>
+                          <Button
+                          as={Link}
+                          href="/appointment"
+                            className="mt-3"
+                            variant="bordered"
+                            color="warning"
+                          >
+                            More Details
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
                   </Tab>
                 )}
               </Tabs>
@@ -88,118 +132,10 @@ const Services = () => {
         </div>
       </div>
       <div>
-        <Slider/>
+        <Slider />
       </div>
     </div>
   );
 };
 
 export default Services;
-
-let tabs = [
-  {
-    id: "cavity",
-    label: "Cavity Protection",
-    content: (
-      <div className="flex flex-col">
-        <Image
-          className="mt-2"
-          src="/assets/images/teeth.png"
-          height={400}
-          width={700}
-          alt="tablet"
-        />
-        <div className="space-y-5">
-          <h1 className="text-2xl font-semibold my-3">
-            Electro Gastrology Therapy
-          </h1>
-          <p className="">
-            Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-            accusantium doloremque laudantium, totam rem aperiam, eaque ipsa
-            quae ab illo inve ntore veritatis et quasi architecto beatae vitae
-            dicta sunt explicabo. Sed ut perspiciatis unde omnis iste natus
-            error{" "}
-          </p>
-          <p className="">
-            Sit voluptatem accusantium doloremque laudantium, totam rem aperiam,
-            eaque ipsa quae ab illo inve ntore veritatis et quasi architecto
-            beatae vitae dicta sunt explicabo.
-          </p>
-          <Button className="mt-3" variant="bordered" color="warning">
-            More Details
-          </Button>
-        </div>
-      </div>
-    ),
-  },
-  {
-    id: "cosmetic",
-    label: "Cosmetic Dentisty",
-    content: (
-      <div className="flex flex-col">
-        <Image
-          className="mt-2"
-          src="/assets/images/teeth.png"
-          height={400}
-          width={700}
-          alt="tablet"
-        />
-        <div className="space-y-5">
-          <h1 className="text-2xl font-semibold my-3">
-            Electro Gastrology Therapy
-          </h1>
-          <p className="">
-            Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-            accusantium doloremque laudantium, totam rem aperiam, eaque ipsa
-            quae ab illo inve ntore veritatis et quasi architecto beatae vitae
-            dicta sunt explicabo. Sed ut perspiciatis unde omnis iste natus
-            error{" "}
-          </p>
-          <p className="">
-            Sit voluptatem accusantium doloremque laudantium, totam rem aperiam,
-            eaque ipsa quae ab illo inve ntore veritatis et quasi architecto
-            beatae vitae dicta sunt explicabo.
-          </p>
-          <Button className="mt-3" variant="bordered" color="warning">
-            More Details
-          </Button>
-        </div>
-      </div>
-    ),
-  },
-  {
-    id: "oral",
-    label: "Oraal Surgery",
-    content: (
-      <div className="flex flex-col">
-        <Image
-          className="mt-2"
-          src="/assets/images/teeth.png"
-          height={400}
-          width={700}
-          alt="tablet"
-        />
-        <div className="space-y-5">
-          <h1 className="text-2xl font-semibold my-3">
-            Electro Gastrology Therapy
-          </h1>
-          <p className="">
-            Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-            accusantium doloremque laudantium, totam rem aperiam, eaque ipsa
-            quae ab illo inve ntore veritatis et quasi architecto beatae vitae
-            dicta sunt explicabo. Sed ut perspiciatis unde omnis iste natus
-            error{" "}
-          </p>
-          <p className="">
-            Sit voluptatem accusantium doloremque laudantium, totam rem aperiam,
-            eaque ipsa quae ab illo inve ntore veritatis et quasi architecto
-            beatae vitae dicta sunt explicabo.
-          </p>
-          <Button className="mt-3" variant="bordered" color="warning">
-            More Details
-          </Button>
-        </div>
-      </div>
-    ),
-  },
-];
