@@ -6,6 +6,7 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import "react-notifications/lib/notifications.css";
 import {
   Modal,
   ModalContent,
@@ -15,15 +16,18 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 import { useSession } from "next-auth/react";
+import { NotificationContainer, NotificationManager } from "react-notifications";
 
 const Appointment = () => {
   const [value, onChange] = useState(new Date());
   const [services, setServices] = useState([]);
+  const [doctors, setDoctors] = useState([]);
 
   const [slots, setSlots] = useState([]);
 
   const session = useSession();
-  console.log("session", session);
+
+  const [currentSlot, setCurrentSlot] = useState("");
 
   useEffect(() => {
     const getServices = async () => {
@@ -35,6 +39,16 @@ const Appointment = () => {
     getServices();
   }, []);
 
+  useEffect(() => {
+    const getDoctors = async () => {
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/doctors`
+      );
+      setDoctors(res.data.res);
+    };
+    getDoctors();
+  }, []);
+
   const hadleSlots = async (id, name, image, slot) => {
     const res = await axios.get(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/services/slots/${id}`
@@ -42,18 +56,52 @@ const Appointment = () => {
     setSlots({ slots: [...res.data.res.slots], name, image });
   };
 
-  console.log(slots);
-
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [backdrop, setBackdrop] = React.useState("opaque");
 
-  const handleOpen = () => {
-    setBackdrop("opaque");
+  const handleOpen = slot => {
+    setBackdrop("blur");
     onOpen();
+    setCurrentSlot(slot);
   };
 
-  const hadleBooking = e => {
+  const [selectedDoctor, setSelectedDoctor] = useState({});
+
+  const handleSelectChange = value => {
+    setSelectedDoctor(value);
+  };
+
+  const hadleBooking = async e => {
     e.preventDefault();
+
+    const docId = selectedDoctor.target?.value;
+
+    const currentDoc = doctors.find(doc => doc._id === docId);
+
+    const info = {
+      name: e.target.name.value,
+      email: e.target.email.value,
+      date: e.target.date.value,
+
+      doctor: currentDoc,
+      slot: e.target.slot.value,
+      phone: e.target.phone.value,
+    };
+
+    const res = await axios.post(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/bookings`,
+      info
+    );
+
+    console.log(res.data.res);
+  
+    if(res.data.res.acknowledged === true){
+      NotificationManager.success("Booking succed", "Booked");
+      
+    }else{
+      NotificationManager.error("Something went wrong", "failed");
+
+    }
   };
   return (
     <div>
@@ -154,71 +202,94 @@ const Appointment = () => {
                     Book Appointment
                   </Button>
                 </div>
-                <Modal
-                  backdrop={backdrop}
-                  isOpen={isOpen}
-                  onClose={onClose}
-                  placement={"bottom"}
-                >
-                  <ModalContent>
-                    {onClose => (
-                      <form onSubmit={hadleBooking}>
-                        <ModalHeader className="flex flex-col gap-1">
-                          {slots.name}
-                        </ModalHeader>
-                        <ModalBody>
-                          <Input
-                            size="sm"
-                            type="text"
-                            label="date"
-                            value={`${value.getDate()}/${value.getMonth()}/${value.getFullYear()}`}
-                          />
-                          <Input
-                            size="sm"
-                            type="text"
-                            label="Slot"
-                            defaultValue={slot}
-                            readOnly
-                          />
-                          <Input
-                            size="sm"
-                            type="text"
-                            label="Full Name"
-                            defaultValue={session.data.user.name}
-                            readOnly
-                          />
-                          <Input
-                            size="sm"
-                            type="Email"
-                            label="Email"
-                            defaultValue={session.data.user.email}
-                            readOnly
-                          />
-                          <Select label="Select Doctor">
-                            <SelectItem>
-                              xxx
-                            </SelectItem>
-                          </Select>
-                          <Input size="sm" type="number" label="Phone Numbr" />
-
-                          <Button
-                            type="submit"
-                            variant="shadow"
-                            color="success"
-                            fullWidth
-                          >
-                            Submit
-                          </Button>
-                        </ModalBody>
-                      </form>
-                    )}
-                  </ModalContent>
-                </Modal>
               </>
             ))}
           </div>
+          <Modal
+            backdrop={backdrop}
+            isOpen={isOpen}
+            onClose={onClose}
+            placement={"bottom"}
+          >
+            <ModalContent>
+              {onClose => (
+                <form onSubmit={hadleBooking}>
+                  <ModalHeader className="flex flex-col gap-1">
+                    {slots.name}
+                  </ModalHeader>
+                  <ModalBody>
+                    <Input
+                      name="date"
+                      size="sm"
+                      type="text"
+                      label="date"
+                      value={`${value.getDate()}/${value.getMonth()}/${value.getFullYear()}`}
+                      required
+                      readOnly
+                    />
+                    <Input
+                      name="slot"
+                      size="sm"
+                      type="text"
+                      label="Slot"
+                      defaultValue={currentSlot}
+                      readOnly
+                      required
+                    />
+                    <Input
+                      name="name"
+                      size="sm"
+                      type="text"
+                      label="Full Name"
+                      defaultValue={session.data.user.name}
+                      readOnly
+                      required
+                    />
+                    <Input
+                      name="email"
+                      size="sm"
+                      type="Email"
+                      label="Email"
+                      defaultValue={session.data.user.email}
+                      readOnly
+                      required
+                    />
+                    <Select
+                      label="Select Doctor"
+                      onChange={handleSelectChange}
+                      required
+                    >
+                      {doctors.map((doctor, i) => (
+                        <SelectItem key={doctor._id} name="doctor">
+                          {doctor.name}
+                        </SelectItem>
+                      ))}
+                    </Select>
+                    <Input
+                      size="sm"
+                      type="number"
+                      label="Phone Numbr"
+                      name="phone"
+                      required
+                    />
+
+                    <Button
+                      type="submit"
+                      variant="shadow"
+                      color="success"
+                      fullWidth
+                    >
+                      Submit
+                    </Button>
+                  </ModalBody>
+                </form>
+              )}
+            </ModalContent>
+          </Modal>
         </div>
       )}
+      <NotificationContainer />
+
     </div>
   );
 };
